@@ -10,6 +10,7 @@ namespace Banzai3
 {
     public partial class MainWindow : Form
     {
+        // ReSharper disable once RedundantDefaultMemberInitializer
         private bool editorMode = false;
         private Cross cross;
         private readonly Stack<Cross> editorHistoryUndo = new Stack<Cross>();
