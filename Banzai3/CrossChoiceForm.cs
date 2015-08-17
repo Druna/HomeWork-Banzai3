@@ -195,14 +195,19 @@ namespace Banzai3
         private void OnClickEdit(string file)
         {
             currentFile = file;
-            DialogResult = DialogResult.Retry;
+            DialogResult = DialogResult.No;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="path"></param>
-        /// <returns>null - cancel, couple value - load dir\file, single value - open editor with new empty user cross in dir</returns>
+        /// <returns> TODO need refactoring
+        /// null - cancel,
+        /// couple values - load dir\file,
+        /// single value - open editor with new empty user cross in dir
+        /// triple values - edit exists user cross
+        ///</returns>
         public static string[] SelectCross(string path)
         {
             var form = new CrossChoiceForm
@@ -211,13 +216,14 @@ namespace Banzai3
             };
             var res = form.ShowDialog();
 
+            //TODO need refactoring
             switch (res)
             {
                 case DialogResult.OK:
                     return new[] {form.currentDir, form.currentFile};
                 case DialogResult.Yes:
                     return new[] {form.currentDir};
-                case DialogResult.Retry:
+                case DialogResult.No:
                     return new[] { form.currentDir, form.currentFile, "EdiorMode" };
                 default:
                     return null;

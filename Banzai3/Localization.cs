@@ -10,6 +10,9 @@ using Microsoft.SqlServer.Server;
 
 namespace Banzai3
 {
+    /// <summary>
+    /// TODO not released yet
+    /// </summary>
     public static class Localization
     {
         private static readonly Dictionary<string, string> Cultures =
