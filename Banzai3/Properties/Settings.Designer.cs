@@ -46,5 +46,17 @@ namespace Banzai3.Properties {
                 this["LastFile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int LastScale {
+            get {
+                return ((int)(this["LastScale"]));
+            }
+            set {
+                this["LastScale"] = value;
+            }
+        }
     }
 }

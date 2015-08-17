@@ -44,6 +44,9 @@ namespace Banzai3
                     MessageBox.Show($"Error loading last save{Environment.NewLine}{ex}");
                 }
             }
+            scaleSize = Settings.Default.LastScale;
+            if (scaleSize > ScaleMax || scaleSize < ScaleMin)
+                scaleSize = ScaleStd;
             UpdateSize();
             UpdateBtnState();
             cross.CheckLines();
@@ -54,6 +57,9 @@ namespace Banzai3
         {
             if(!editorMode)
                 SaveCurrent();
+            Settings.Default.LastScale = scaleSize;
+            Settings.Default.Save();
+
         }
 
         #endregion load/save
