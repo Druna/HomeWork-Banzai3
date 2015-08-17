@@ -48,7 +48,7 @@ namespace Banzai3
             public bool Empty => (Sections.Length == 0) || (Sections.Length == 1 && Sections[0].Len == 0);
         }
 
-        private readonly string name;
+        public readonly string Name;
 
         public readonly Line[] Top;
         public readonly Line[] Left;
@@ -71,7 +71,7 @@ namespace Banzai3
 
         public Cross(int width, int height)
         {
-            name = $@"{width} x {height}";
+            Name = $@"{width} x {height}";
             Top = new Line[width];
             Left = new Line[height];
             for (int i = 0; i < width; i++)
@@ -90,8 +90,8 @@ namespace Banzai3
         public Cross(TextReader t)
         {
             // header
-            name = t.ReadLine()?.Trim();
-            if (string.IsNullOrWhiteSpace(name))
+            Name = t.ReadLine()?.Trim();
+            if (string.IsNullOrWhiteSpace(Name))
                 throw new FormatException("First line have to contains name");
             var s = t.ReadLine();
             if (string.IsNullOrWhiteSpace(s))
@@ -165,7 +165,7 @@ namespace Banzai3
         /// </summary>
         public void Export(StreamWriter stream, bool exportMap)
         {
-            stream.WriteLine(name);
+            stream.WriteLine(Name);
             stream.WriteLine("{0} {1}", TopSize, LeftSize);
             stream.WriteLine();
             foreach (var row in Top)

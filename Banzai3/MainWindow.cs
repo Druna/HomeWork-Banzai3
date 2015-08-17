@@ -598,34 +598,57 @@ namespace Banzai3
             if (newCross == null)
                 return;
 
-            if (newCross.Length == 1)
+            switch (newCross.Length)
             {
-                var size = SelectSizeForm.GetSize(null);
-                if (size == null)
-                    return;
-                var newDir = newCross[0];
-                cross = new Cross(size.Value.Width, size.Value.Height);
-                Settings.Default.LastDir = newDir;
-                Settings.Default.LastFile = "";
-                Settings.Default.Save();
-                editorMode = true;
-            }
-            else
-            {
-                var newDir = newCross[0];
-                var newFile = newCross[1];
-                try
+                case 1:
                 {
-                    cross = CrossIO.Import(newDir, newFile);
+                    var size = SelectSizeForm.GetSize(null);
+                    if (size == null)
+                        return;
+                    var newDir = newCross[0];
+                    cross = new Cross(size.Value.Width, size.Value.Height);
+                    Settings.Default.LastDir = newDir;
+                    Settings.Default.LastFile = "";
+                    Settings.Default.Save();
+                    editorMode = true;
+                    break;
                 }
-                catch (Exception)
+                case 2:
                 {
-                    MessageBox.Show(Localization.GetLocalName("ERROR_IO"));
+                    var newDir = newCross[0];
+                    var newFile = newCross[1];
+                    try
+                    {
+                        cross = CrossIO.Import(newDir, newFile);
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show(Localization.GetLocalName("ERROR_IO"));
+                    }
+                    Settings.Default.LastDir = newDir;
+                    Settings.Default.LastFile = newFile;
+                    Settings.Default.Save();
+                    editorMode = false;
+                    break;
                 }
-                Settings.Default.LastDir = newDir;
-                Settings.Default.LastFile = newFile;
-                Settings.Default.Save();
-                editorMode = false;
+                case 3:
+                    {
+                        var newDir = newCross[0];
+                        var newFile = newCross[1];
+                        try
+                        {
+                            cross = CrossIO.ImportEditor(newFile);
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show(Localization.GetLocalName("ERROR_IO"));
+                        }
+                        Settings.Default.LastDir = newDir;
+                        Settings.Default.LastFile = newFile;
+                        Settings.Default.Save();
+                        editorMode = true;
+                        break;
+                    }
             }
             UpdateSize();
             UpdateBtnState();

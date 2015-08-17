@@ -26,9 +26,9 @@ namespace Banzai3
             return $@"{PathSolve}\{dir}\{file}.{ExtensionSolve}";
         }
 
-        private static string GetFileNameEditor(string file, bool isMap)
+        private static string GetFileNameEditor(string file, bool isEdit)
         {
-            var ext = isMap ? ExtensionEditor : Extension;
+            var ext = isEdit ? ExtensionEditor : Extension;
             var path = GetPathEditor();
             return $@"{path}\{file}.{ext}";
         }
@@ -82,6 +82,9 @@ namespace Banzai3
             {
                 cross.Export(t, false);
             }
+            var solve = GetFileNameSolve(UserDirName, file);
+            if (File.Exists(solve))
+                File.Delete(solve);
         }
 
         public static Cross Import(string dir, string file)
@@ -110,6 +113,15 @@ namespace Banzai3
             }
         }
 
+        public static Cross ImportEditor(string file)
+        {
+            var name = GetFileNameEditor(file, true);
+            using (var stream = File.OpenText(name))
+            {
+                return new Cross(stream);
+            }
+        }
+
         public static IEnumerable<string> GetListDirs()
         {
             return Directory
@@ -130,6 +142,16 @@ namespace Banzai3
                 Directory.CreateDirectory(userPath);
             return Directory
                 .EnumerateFiles($@"{userPath}\", $@"*.{Extension}")
+                .Select(Path.GetFileNameWithoutExtension);
+        }
+
+        public static IEnumerable<string> GetListEditors()
+        {
+            var userPath = GetPathSolve(UserDirName);
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+            return Directory
+                .EnumerateFiles($@"{userPath}\", $@"*.{ExtensionEditor}")
                 .Select(Path.GetFileNameWithoutExtension);
         }
 

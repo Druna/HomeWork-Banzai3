@@ -28,52 +28,91 @@ namespace Banzai3
                 _folder = Resources.icoFolder;
             if (_new == null)
                 _new = Resources.icoNew;
-            RefreshList();
+            RefreshList(currentDir, false);
         }
 
-        private void RefreshList()
+        private void RefreshList(string directory, bool isEditorMode)
         {
             //clear and dispose old items
             var disposeItems = panelLibrary.Controls.OfType<Control>().ToList();
             panelLibrary.Controls.Clear();
             disposeItems.ForEach(i => i.Dispose());
+
+            currentDir = directory;
             //add new items
             if (currentDir == null)
             {
-                var list = CrossIO.GetListDirs()
-                    .Select(
-                        dir => new
-                        {
-                            Name = dir,
-                            Label = Localization.GetLocalName(Path.GetFileNameWithoutExtension(dir))
-                        });
-
-                foreach (var dir in list)
-                {
-                    AddItemToPanel(_folder, dir.Label, dir.Name, OnClickDirectory);
-                }
+                LoadDirectories();
             }
             else
             {
-                var list = CrossIO.GetListFiles(currentDir);
-                AddItemToPanel(_folder, "...", null, OnClickBack);
-                if (CrossIO.IsUserDir(currentDir))
-                    AddItemToPanel(_new, Localization.GetLocalName("Create New"), null, OnClickNew);
-                foreach (var fileName in list)
+                if (!isEditorMode)
+                    LoadFiles();
+                else
+                    LoadEditor();
+            }
+        }
+
+        private void LoadFiles()
+        {
+            var list = CrossIO.GetListFiles(currentDir);
+            AddItemToPanel(_folder, "...", null, OnClickBack);
+            if (CrossIO.IsUserDir(currentDir))
+            {
+                AddItemToPanel(_new, Localization.GetLocalName("Create New"), null, OnClickNew);
+                AddItemToPanel(_new, Localization.GetLocalName("Edit"), currentDir, OnClickEditor);
+            }
+            foreach (var fileName in list)
+            {
+                Cross cross;
+                try
                 {
-                    Cross cross;
-                    try
-                    {
-                        cross = CrossIO.Import(currentDir, fileName);
-                    }
-                    catch (Exception)
-                    {
-                        //TODO log here
-                        continue;
-                    }
-                    string label = $"{cross.TopSize} x {cross.LeftSize}";
-                    AddItemToPanel(CrossMakeIcon(cross), label, fileName, OnClickFile);
+                    cross = CrossIO.Import(currentDir, fileName);
                 }
+                catch (Exception)
+                {
+                    //TODO log here
+                    continue;
+                }
+                string label = $"{cross.TopSize} x {cross.LeftSize}";
+                AddItemToPanel(CrossMakeIcon(cross), label, fileName, OnClickFile);
+            }
+        }
+
+        private void LoadEditor()
+        {
+            var list = CrossIO.GetListEditors();
+            AddItemToPanel(_folder, "...", null, OnClickBack);
+            foreach (var fileName in list)
+            {
+                Cross cross;
+                try
+                {
+                    cross = CrossIO.ImportEditor(fileName);
+                }
+                catch (Exception)
+                {
+                    //TODO log here
+                    continue;
+                }
+                string label = $"{fileName}";
+                AddItemToPanel(CrossMakeIcon(cross), label, fileName, OnClickEdit);
+            }
+        }
+
+        private void LoadDirectories()
+        {
+            var list = CrossIO.GetListDirs()
+                .Select(
+                    dir => new
+                    {
+                        Name = dir,
+                        Label = Localization.GetLocalName(Path.GetFileNameWithoutExtension(dir))
+                    });
+
+            foreach (var dir in list)
+            {
+                AddItemToPanel(_folder, dir.Label, dir.Name, OnClickDirectory);
             }
         }
 
@@ -128,14 +167,12 @@ namespace Banzai3
 
         private void OnClickDirectory(string directory)
         {
-            currentDir = directory;
-            RefreshList();
+            RefreshList(directory, false);
         }
 
         private void OnClickBack(string empty)
         {
-            currentDir = null;
-            RefreshList();
+            RefreshList(null, false);
         }
 
         private void OnClickFile(string file)
@@ -144,10 +181,21 @@ namespace Banzai3
             DialogResult = DialogResult.OK;
         }
 
-        private void OnClickNew(string obj)
+        private void OnClickNew(string empty)
         {
             currentFile = null;
             DialogResult = DialogResult.Yes;
+        }
+
+        private void OnClickEditor(string userDir)
+        {
+            RefreshList(userDir, true);
+        }
+
+        private void OnClickEdit(string file)
+        {
+            currentFile = file;
+            DialogResult = DialogResult.Retry;
         }
 
         /// <summary>
@@ -169,6 +217,8 @@ namespace Banzai3
                     return new[] {form.currentDir, form.currentFile};
                 case DialogResult.Yes:
                     return new[] {form.currentDir};
+                case DialogResult.Retry:
+                    return new[] { form.currentDir, form.currentFile, "EdiorMode" };
                 default:
                     return null;
             }
