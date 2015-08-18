@@ -178,6 +178,7 @@
     <Content Include="Icons\go-first-rtl.png" />
     <Content Include="Icons\go-first.png" />
     <Content Include="Icons\go-top.png" />
+    <Content Include="Icons\help-browser.png" />
     <Content Include="Icons\zoom-in.png" />
     <Content Include="Icons\zoom-out.png" />
   </ItemGroup>

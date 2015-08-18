@@ -296,7 +296,7 @@ namespace Banzai3
         }
 
         /// <summary>
-        /// There is not <i>'ugly class'</i>
+        /// There is not <pos>'ugly class'</pos>
         /// It's the class contains very slow function
         /// So, need three stages to develop the class
         /// 1. Create algorytm, test and fix all bugs
@@ -334,7 +334,8 @@ namespace Banzai3
             private PassResultDelegate passResult;
 
             // result of recursion, mode 'Check'
-            private bool[,] flags;
+            private bool[,] posFlags;
+            private CellSolve[] solveFlags;
 
             // no LINQ - there need maximize speed, then there used only arrays, not used 'yyeld return' and etc
             private void CheckLineRecursion(int section, int pos)
@@ -381,12 +382,12 @@ namespace Banzai3
                 }
             }
 
-            private void PassResultCheck()
+            private void PassResultPosition()
             {
                 //recursion finish point, we found variant, fix it as accepted
                 for (int j = 0; j < positions.Length; j++)
                 {
-                    flags[j, positions[j]] = true;
+                    posFlags[j, positions[j]] = true;
                 }
             }
 
@@ -413,15 +414,15 @@ namespace Banzai3
                     return result;
                 }
 
-                flags = new bool[count, cells.Length];
-                passResult = PassResultCheck;
+                posFlags = new bool[count, cells.Length];
+                passResult = PassResultPosition;
 
                 CheckLineRecursion(0, 0);
 
                 for (int i = 0; i < count; i++)
                 {
                     int trueCount =
-                        flags
+                        posFlags
                             .AsEnumerableDimension1(i)
                             .Count(f => f);
                     switch (trueCount)
@@ -434,7 +435,7 @@ namespace Banzai3
                         case 1:
                             //check position of True value
                             int pos =
-                                flags
+                                posFlags
                                     .AsEnumerableDimension1(i)
                                     .TakeWhile(f => !f)
                                     .Count();
@@ -454,6 +455,52 @@ namespace Banzai3
                     }
                 }
                 return result;
+            }
+
+            private void PassResultSolve()
+            {
+                int pos = 0;
+                for (int i = 0; i < positions.Length; i++)
+                {
+                    while (pos < positions[i])
+                        solveFlags[pos++].IsDot = true;
+                    while (pos < positions[i] + sections[i])
+                        solveFlags[pos++].IsFill = true;
+                }
+                while (pos < solveFlags.Length)
+                    solveFlags[pos++].IsDot = true;
+            }
+
+            public CellState[] DoSolveLine()
+            {
+                var len = cells.Length;
+                var count = sections.Length;
+
+                if (count == 0 || (count == 1 && sections[0] == 0))
+                {
+                    return ArrayExtension.NewFill(len, CellState.Unknown);
+                }
+                solveFlags = new CellSolve[len];
+                passResult = PassResultSolve;
+                CheckLineRecursion(0, 0);
+                var result =
+                    solveFlags
+                        .Select(s => s.CheckCellState)
+                        .ToArray();
+                return result;
+            }
+
+            private struct CellSolve
+            {
+                public bool IsDot;
+                public bool IsFill;
+
+                public CellState CheckCellState
+                    => (IsDot && !IsFill)
+                        ? CellState.Dot
+                        : (!IsDot && IsFill)
+                            ? CellState.Fill
+                            : CellState.Unknown;
             }
         }
 
@@ -475,16 +522,86 @@ namespace Banzai3
             CheckLines(Left, true);
         }
 
-        private void CheckLines(Line[] side, bool isDimension0)
+        public void SolveLine(bool onlyOne)
+        {
+            var r = new Random((int) (DateTime.Now.Ticks%int.MaxValue));
+            var allLinesTop =
+                Top
+                    .Where(l => l.Sections.All(s => s.State != SectionState.Wrong))
+                    .Select((l, i) => new
+                    {
+                        IsLeft = false,
+                        Line = i,
+                        Rand = r.Next()
+                    });
+
+            var allLinesLeft =
+                Left
+                    .Where(l => l.Sections.All(s => s.State != SectionState.Wrong))
+                    .Select((l, i) => new
+                    {
+                        IsLeft = true,
+                        Line = i,
+                        Rand = r.Next()
+                    });
+
+            var allLinesRandom =
+                allLinesTop
+                    .Concat(allLinesLeft)
+                    .OrderBy(al => al.Rand);
+
+            foreach (var line in allLinesRandom)
+            {
+                var side = line.IsLeft ?  Left: Top;
+                var sections = side[line.Line].Sections.Select(s => s.Len).ToArray();
+                var cells = GetMapLine(line.Line, line.IsLeft);
+                var check = new CheckLineClass(cells, sections);
+                var result = check.DoSolveLine();
+                // if cells 
+                if (!cells.Where((t, i) => t == CellState.Unknown && result[i] != CellState.Unknown).Any())
+                    continue;
+
+                for (int i = 0; i < result.Length; i++)
+                {
+                    if (GetMapCell(line.Line, i, line.IsLeft) == CellState.Unknown)
+                        SetMapCell(line.Line, i, line.IsLeft, result[i]);
+                }
+                HistoryNextStep();
+                if (onlyOne)
+                    return;
+            }
+        }
+
+        private CellState GetMapCell(int line, int pos, bool isLeft)
+        {
+            return isLeft ? map[pos, line] : map[line, pos];
+        }
+
+        private void SetMapCell(int line, int pos, bool isLeft, CellState state)
+        {
+            if (isLeft)
+                SetCell(pos, line, state);
+            else
+                SetCell(line, pos, state);
+        }
+
+        public CellState[] GetMapLine(int index, bool isSideLeft)
+        {
+            return
+                ((isSideLeft)
+                    ? map.AsEnumerableDimension0(index)
+                    : map.AsEnumerableDimension1(index))
+                    .ToArray();
+
+        }
+
+        private void CheckLines(Line[] side, bool isLeft)
         {
             for (int i = 0; i < side.Length; i++)
             {
                 if (side[i].IsSolveChecked)
                     continue;
-                var cells =
-                    isDimension0
-                        ? map.AsEnumerableDimension0(i).ToArray()
-                        : map.AsEnumerableDimension1(i).ToArray();
+                var cells = GetMapLine(i, isLeft);
                 CheckLine(side[i], cells);
             }
         }
@@ -495,11 +612,11 @@ namespace Banzai3
         {
             for (int i = 0; i < Top.Length; i++)
             {
-                Top[i] = new Line(CalcLine(map.AsEnumerableDimension1(i)));
+                Top[i] = new Line(CalcLine(GetMapLine(i, false)));
             }
             for (int i = 0; i < Left.Length; i++)
             {
-                Left[i] = new Line(CalcLine(map.AsEnumerableDimension0(i)));
+                Left[i] = new Line(CalcLine(GetMapLine(i, true)));
             }
         }
 
@@ -588,6 +705,18 @@ namespace Banzai3
                 for (int j = 0; j < Left.Length; j++)
                     newCross.map[i + addLeft, j + addTop] = map[i, j];
             return newCross;
+        }
+
+        public int GetSolved()
+        {
+            int n = 0;
+            for (int i = 0; i < TopSize; i++)
+                for (int j = 0; j < LeftSize; j++)
+                {
+                    if (map[i, j] != CellState.Unknown)
+                        n++;
+                }
+            return n;
         }
     }
 }

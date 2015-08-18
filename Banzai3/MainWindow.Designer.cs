@@ -42,6 +42,8 @@
             this.btnAddTop = new System.Windows.Forms.ToolStripButton();
             this.btnAddDown = new System.Windows.Forms.ToolStripButton();
             this.btnClear = new System.Windows.Forms.ToolStripButton();
+            this.btnHelp = new System.Windows.Forms.ToolStripButton();
+            this.btnProgress = new System.Windows.Forms.ToolStripButton();
             this.panelCross = new Banzai3.PanelCross();
             this.panelScroll.SuspendLayout();
             this.toolStrip.SuspendLayout();
@@ -52,15 +54,14 @@
             this.panelScroll.AutoScroll = true;
             this.panelScroll.Controls.Add(this.panelCross);
             this.panelScroll.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelScroll.Location = new System.Drawing.Point(0, 53);
+            this.panelScroll.Location = new System.Drawing.Point(0, 55);
             this.panelScroll.Name = "panelScroll";
-            this.panelScroll.Size = new System.Drawing.Size(803, 446);
+            this.panelScroll.Size = new System.Drawing.Size(1024, 444);
             this.panelScroll.TabIndex = 1;
             this.panelScroll.Resize += new System.EventHandler(this.crossScroll_Resize);
             // 
             // toolStrip
             // 
-            this.toolStrip.AutoSize = false;
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnSelect,
             this.btnSave,
@@ -73,10 +74,12 @@
             this.btnAddRight,
             this.btnAddTop,
             this.btnAddDown,
-            this.btnClear});
+            this.btnClear,
+            this.btnHelp,
+            this.btnProgress});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(803, 53);
+            this.toolStrip.Size = new System.Drawing.Size(1024, 55);
             this.toolStrip.TabIndex = 0;
             // 
             // btnSelect
@@ -86,7 +89,7 @@
             this.btnSelect.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.btnSelect.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnSelect.Name = "btnSelect";
-            this.btnSelect.Size = new System.Drawing.Size(52, 50);
+            this.btnSelect.Size = new System.Drawing.Size(52, 52);
             this.btnSelect.Text = "Open";
             this.btnSelect.Click += new System.EventHandler(this.btnSelect_Click);
             // 
@@ -134,7 +137,7 @@
             this.btnUndo.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.btnUndo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnUndo.Name = "btnUndo";
-            this.btnUndo.Size = new System.Drawing.Size(52, 50);
+            this.btnUndo.Size = new System.Drawing.Size(52, 52);
             this.btnUndo.Text = "Undo";
             this.btnUndo.Click += new System.EventHandler(this.btnUndo_Click);
             // 
@@ -222,6 +225,30 @@
             this.btnClear.Text = "Clear";
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
+            // btnHelp
+            // 
+            this.btnHelp.AutoSize = false;
+            this.btnHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnHelp.Image = global::Banzai3.Properties.Resources.icoHelpOne;
+            this.btnHelp.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.btnHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(50, 50);
+            this.btnHelp.Text = "Help";
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            // 
+            // btnProgress
+            // 
+            this.btnProgress.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnProgress.AutoSize = false;
+            this.btnProgress.Font = new System.Drawing.Font("Segoe UI Semibold", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnProgress.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.btnProgress.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnProgress.Name = "btnProgress";
+            this.btnProgress.Size = new System.Drawing.Size(50, 50);
+            this.btnProgress.Text = "%";
+            this.btnProgress.TextImageRelation = System.Windows.Forms.TextImageRelation.Overlay;
+            // 
             // panelCross
             // 
             this.panelCross.Location = new System.Drawing.Point(101, 111);
@@ -237,7 +264,7 @@
             // MainWindow
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(803, 499);
+            this.ClientSize = new System.Drawing.Size(1024, 499);
             this.Controls.Add(this.panelScroll);
             this.Controls.Add(this.toolStrip);
             this.DoubleBuffered = true;
@@ -250,6 +277,7 @@
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -270,6 +298,8 @@
         private System.Windows.Forms.ToolStripButton btnClear;
         private System.Windows.Forms.ToolStripButton btnZoomIn;
         private System.Windows.Forms.ToolStripButton btnZoomOut;
+        private System.Windows.Forms.ToolStripButton btnHelp;
+        private System.Windows.Forms.ToolStripButton btnProgress;
     }
 }
 

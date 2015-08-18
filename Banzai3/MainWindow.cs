@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
@@ -523,6 +524,7 @@ namespace Banzai3
             btnSave.Visible = editorMode;
             btnZoomIn.Enabled = (scaleSize < ScaleMax);
             btnZoomOut.Enabled = (scaleSize > ScaleMin);
+            btnHelp.Enabled = !editorMode;
             if (editorMode)
             {
                 btnCrop.Enabled =
@@ -536,7 +538,32 @@ namespace Banzai3
                 btnAddTop.Enabled = true;
                 btnAddDown.Enabled = true;
                 btnSave.Enabled = true;
+                btnProgress.Visible = false;
             }
+            else
+            {
+                btnProgress.Visible = true;
+                UpdateProgressButton();
+            }
+        }
+
+        private void UpdateProgressButton()
+        {
+            var size = ((decimal) cross.GetSolved())/(cross.TopSize*cross.LeftSize);
+            var newText = $"{Math.Truncate(100*size)}%";
+            if (btnProgress.Text == newText)
+                return;
+            btnProgress.Text = newText;
+            var bmp = new Bitmap(btnProgress.Size.Width - 3, btnProgress.Size.Height - 3);
+            using (var g = Graphics.FromImage(bmp))
+            using (var pen1 = new Pen(Color.PaleGreen, 8))
+            using (var pen2 = new Pen(Color.Cyan, 2))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.DrawArc(pen1, 6, 6, bmp.Width - 1 - 6 - 6, bmp.Height - 1 - 6 - 6, 0, (int) (size*360));
+                g.DrawArc(pen2, 6, 6, bmp.Width - 1 - 6 - 6, bmp.Height - 1 - 6 - 6, 0, (int) (size*360));
+            }
+            btnProgress.Image = bmp;
         }
 
         private void btnUndo_Click(object sender, EventArgs e)
@@ -799,6 +826,16 @@ namespace Banzai3
             if (scaleSize < ScaleMin)
                 scaleSize = ScaleMin;
             UpdateSize();
+            UpdateBtnState();
+            panelCross.Invalidate();
+        }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            if (editorMode)
+                return;
+            cross.SolveLine(true);
+            cross.CheckLines();
             UpdateBtnState();
             panelCross.Invalidate();
         }
